@@ -18,17 +18,17 @@ const userSchema = new mongoose.Schema(
         date: {
           type: Date,
           required: true,
-          index: true
+          index: true,
         },
         startTime: {
           type: String,
-          required: true
+          required: true,
         },
         endTime: {
           type: String,
-          required: true
-        }
-      }
+          required: true,
+        },
+      },
     ],
     academicGoals: [
       {

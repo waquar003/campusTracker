@@ -89,12 +89,14 @@ const logoutUser = asyncHandler(async (req, res) => {
 const profile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
-    if (!user) {
-      throw new ApiError(400, 'User not found');
-    }
+  if (!user) {
+    throw new ApiError(400, 'User not found');
+  }
 
-    return res.status(200).json(new ApiResponse(200, user, 'User fetched successfully'));
-)
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, 'User fetched successfully'));
+});
 
 const getScheduleByDate = asyncHandler(async (req, res) => {
   const { date } = req.query;
@@ -105,9 +107,9 @@ const getScheduleByDate = asyncHandler(async (req, res) => {
   }
 
   const selectedDate = new Date(date);
-  
+
   const dailySchedule = user.schedule
-    .filter(item => {
+    .filter((item) => {
       const itemDate = new Date(item.date);
       return itemDate.toDateString() === selectedDate.toDateString();
     })
@@ -115,7 +117,13 @@ const getScheduleByDate = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, dailySchedule, 'Daily schedule retrieved successfully'));
+    .json(
+      new ApiResponse(
+        200,
+        dailySchedule,
+        'Daily schedule retrieved successfully'
+      )
+    );
 });
 
 const createEvent = asyncHandler(async (req, res) => {
@@ -136,7 +144,7 @@ const createEvent = asyncHandler(async (req, res) => {
     start: new Date(start),
     end: new Date(end),
     type,
-    location
+    location,
   };
 
   user.schedule.push(newEvent);
@@ -147,11 +155,62 @@ const createEvent = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, newEvent, 'Event created successfully'));
 });
 
-export { 
-  registerUser, 
-  loginUser, 
-  logoutUser, 
-  profile, 
+const updateProfile = asyncHandler(async (req, res) => {
+  const { name, currentPassword, newPassword } = req.body;
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  if (currentPassword && newPassword) {
+    const isPasswordValid = await user.isPasswordCorrect(currentPassword);
+    if (!isPasswordValid) {
+      throw new ApiError(400, 'Current password is incorrect');
+    }
+    user.password = newPassword;
+  }
+
+  if (name) {
+    user.name = name;
+  }
+
+  await user.save();
+
+  const updatedUser = await User.findById(user._id).select('-password');
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedUser, 'Profile updated successfully'));
+});
+
+const updateProfilePicture = asyncHandler(async (req, res) => {
+  const profilePictureLocalPath = req.file?.path;
+
+  if (!profilePictureLocalPath) {
+    throw new ApiError(400, 'Profile picture is required');
+  }
+
+  const profilePicture = await uploadOnCloudinary(profilePictureLocalPath);
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    { profilePicture: profilePicture.url },
+    { new: true }
+  ).select('-password');
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, 'Profile picture updated successfully'));
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  profile,
   getScheduleByDate,
-  createEvent  
+  createEvent,
+  updateProfile,
+  updateProfilePicture,
 };

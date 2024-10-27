@@ -7,6 +7,8 @@ import {
   registerUser,
   getScheduleByDate,
   createEvent,
+  updateProfile,
+  updateProfilePicture,
 } from '../controllers/User.controller.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 
@@ -29,5 +31,11 @@ router.route('/logout').post(verifyJWT, logoutUser);
 router.route('/dashboard').post(verifyJWT, profile);
 router.route('/schedule').post(verifyJWT, getScheduleByDate);
 router.route('/event').post(verifyJWT, createEvent);
+
+// New settings routes
+router.route('/update-profile').patch(verifyJWT, updateProfile);
+router
+  .route('/update-profile-picture')
+  .patch(verifyJWT, upload.single('profilePicture'), updateProfilePicture);
 
 export default router;
