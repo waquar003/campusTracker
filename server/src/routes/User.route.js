@@ -1,5 +1,5 @@
 import express from 'express';
-import {upload} from '../middlewares/multer.middleware.js';
+import { upload } from '../middlewares/multer.middleware.js';
 import {
   loginUser,
   logoutUser,
@@ -11,7 +11,12 @@ import {
   updateProfilePicture,
   addAcademicGoal,
   getAcademicGoals,
+  markGoalComplete,
   deleteAcademicGoal,
+  createAssignment,
+  updateAssignment,
+  deleteAssignment,
+  getAllAssignments,
 } from '../controllers/User.controller.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 
@@ -40,11 +45,17 @@ router
   .route('/update-profile-picture')
   .patch(verifyJWT, upload.single('profilePicture'), updateProfilePicture);
 
+// Academic Goals routes
+router.route('/academic-goals').get(verifyJWT, getAcademicGoals);
+router.route('/academic-goals').post(verifyJWT, addAcademicGoal);
 router
-  .route('/academic-goals')
-  .get(verifyJWT, getAcademicGoals)
-  .post(verifyJWT, addAcademicGoal);
-
+  .route('/academic-goals/:goalId/complete')
+  .patch(verifyJWT, markGoalComplete);
 router.route('/academic-goals/:goalId').delete(verifyJWT, deleteAcademicGoal);
+
+router.route('/assignments').get(verifyJWT, getAllAssignments);
+router.route('/assignments').post(verifyJWT, createAssignment);
+router.route('/assignments/:assignmentId').patch(verifyJWT, updateAssignment);
+router.route('/assignments/:assignmentId').delete(verifyJWT, deleteAssignment);
 
 export default router;
