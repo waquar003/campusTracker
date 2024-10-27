@@ -86,4 +86,72 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, null, 'User logged out successfully'));
 });
 
-export { registerUser, loginUser, logoutUser };
+const profile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+    if (!user) {
+      throw new ApiError(400, 'User not found');
+    }
+
+    return res.status(200).json(new ApiResponse(200, user, 'User fetched successfully'));
+)
+
+const getScheduleByDate = asyncHandler(async (req, res) => {
+  const { date } = req.query;
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  const selectedDate = new Date(date);
+  
+  const dailySchedule = user.schedule
+    .filter(item => {
+      const itemDate = new Date(item.date);
+      return itemDate.toDateString() === selectedDate.toDateString();
+    })
+    .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, dailySchedule, 'Daily schedule retrieved successfully'));
+});
+
+const createEvent = asyncHandler(async (req, res) => {
+  const { title, start, end, type, location } = req.body;
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  if (!title || !start || !end || !type) {
+    throw new ApiError(400, 'Required fields missing');
+  }
+
+  const newEvent = {
+    id: Date.now().toString(), // Simple unique ID generation
+    title,
+    start: new Date(start),
+    end: new Date(end),
+    type,
+    location
+  };
+
+  user.schedule.push(newEvent);
+  await user.save();
+
+  return res
+    .status(201)
+    .json(new ApiResponse(201, newEvent, 'Event created successfully'));
+});
+
+export { 
+  registerUser, 
+  loginUser, 
+  logoutUser, 
+  profile, 
+  getScheduleByDate,
+  createEvent  
+};
