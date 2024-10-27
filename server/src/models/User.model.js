@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
     studyGroups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'StudyGroup' }],
     schedule: [
       {
+        id: String,
         location: String,
         activity: String,
         date: {
@@ -32,6 +33,7 @@ const userSchema = new mongoose.Schema(
     ],
     academicGoals: [
       {
+        id: String,
         title: String,
         description: String,
         deadline: Date,

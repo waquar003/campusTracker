@@ -2,7 +2,7 @@ import { User } from '../models/User.model.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
-import { uploadOnCloudinary } from '../utils/uploadOnCloudinary.js';
+import { uploadOnCloudinary } from '../utils/cloudinary.js';
 
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
@@ -204,6 +204,64 @@ const updateProfilePicture = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, 'Profile picture updated successfully'));
 });
 
+const addAcademicGoal = asyncHandler(async (req, res) => {
+  const { title, description, deadline } = req.body;
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  const newGoal = {
+    id: Date.now().toString(),
+    title,
+    description,
+    deadline: new Date(deadline),
+    completed: false,
+  };
+
+  user.academicGoals.push(newGoal);
+  await user.save();
+
+  return res
+    .status(201)
+    .json(new ApiResponse(201, newGoal, 'Academic goal added successfully'));
+});
+
+const getAcademicGoals = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        user.academicGoals,
+        'Academic goals retrieved successfully'
+      )
+    );
+});
+
+const deleteAcademicGoal = asyncHandler(async (req, res) => {
+  const { goalId } = req.params;
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  user.academicGoals = user.academicGoals.filter((goal) => goal.id !== goalId);
+  await user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, 'Academic goal deleted successfully'));
+});
+
 export {
   registerUser,
   loginUser,
@@ -213,4 +271,7 @@ export {
   createEvent,
   updateProfile,
   updateProfilePicture,
+  addAcademicGoal,
+  getAcademicGoals,
+  deleteAcademicGoal,
 };
