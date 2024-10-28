@@ -17,6 +17,8 @@ import {
   updateAssignment,
   deleteAssignment,
   getAllAssignments,
+  deleteEvent,
+  updateEvent,
 } from '../controllers/User.controller.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 

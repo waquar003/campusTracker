@@ -20,13 +20,14 @@ const userSchema = new mongoose.Schema(
         type: {
           type: String,
           enum: ['lecture', 'assignment', 'study', 'event'],
-          required: true
+          required: true,
         },
         location: String,
         recurring: {
-          days: [{
-            type: String,
-            enum: [
+          days: [
+            {
+              type: String,
+              enum: [
                 'sunday',
                 'monday',
                 'tuesday',
@@ -34,11 +35,12 @@ const userSchema = new mongoose.Schema(
                 'thursday',
                 'friday',
                 'saturday',
-            ]
-          }],
-          until: Date
-        }
-      }
+              ],
+            },
+          ],
+          until: Date,
+        },
+      },
     ],
     academicGoals: [
       {

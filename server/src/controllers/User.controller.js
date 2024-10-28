@@ -145,7 +145,7 @@ const createEvent = asyncHandler(async (req, res) => {
     end: new Date(end),
     type,
     location,
-    recurring
+    recurring,
   };
 
   user.schedule.push(newEvent);
@@ -165,7 +165,7 @@ const updateEvent = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'User not found');
   }
 
-  const eventIndex = user.schedule.findIndex(event => event.id === eventId);
+  const eventIndex = user.schedule.findIndex((event) => event.id === eventId);
   if (eventIndex === -1) {
     throw new ApiError(404, 'Event not found');
   }
@@ -177,7 +177,7 @@ const updateEvent = asyncHandler(async (req, res) => {
     end: new Date(end),
     type,
     location,
-    recurring
+    recurring,
   };
 
   user.schedule[eventIndex] = updatedEvent;
@@ -196,14 +196,13 @@ const deleteEvent = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'User not found');
   }
 
-  user.schedule = user.schedule.filter(event => event.id !== eventId);
+  user.schedule = user.schedule.filter((event) => event.id !== eventId);
   await user.save();
 
   return res
     .status(200)
     .json(new ApiResponse(200, null, 'Event deleted successfully'));
 });
-
 
 const updateProfile = asyncHandler(async (req, res) => {
   const { name, currentPassword, newPassword } = req.body;
