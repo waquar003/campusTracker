@@ -127,7 +127,7 @@ const getScheduleByDate = asyncHandler(async (req, res) => {
 });
 
 const createEvent = asyncHandler(async (req, res) => {
-  const { title, start, end, type, location } = req.body;
+  const { title, start, end, type, location, recurring } = req.body;
   const user = await User.findById(req.user._id);
 
   if (!user) {
@@ -139,12 +139,13 @@ const createEvent = asyncHandler(async (req, res) => {
   }
 
   const newEvent = {
-    id: Date.now().toString(), // Simple unique ID generation
+    id: Date.now().toString(),
     title,
     start: new Date(start),
     end: new Date(end),
     type,
     location,
+    recurring
   };
 
   user.schedule.push(newEvent);
@@ -154,6 +155,55 @@ const createEvent = asyncHandler(async (req, res) => {
     .status(201)
     .json(new ApiResponse(201, newEvent, 'Event created successfully'));
 });
+
+const updateEvent = asyncHandler(async (req, res) => {
+  const { eventId } = req.params;
+  const { title, start, end, type, location, recurring } = req.body;
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  const eventIndex = user.schedule.findIndex(event => event.id === eventId);
+  if (eventIndex === -1) {
+    throw new ApiError(404, 'Event not found');
+  }
+
+  const updatedEvent = {
+    ...user.schedule[eventIndex],
+    title,
+    start: new Date(start),
+    end: new Date(end),
+    type,
+    location,
+    recurring
+  };
+
+  user.schedule[eventIndex] = updatedEvent;
+  await user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedEvent, 'Event updated successfully'));
+});
+
+const deleteEvent = asyncHandler(async (req, res) => {
+  const { eventId } = req.params;
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  user.schedule = user.schedule.filter(event => event.id !== eventId);
+  await user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, 'Event deleted successfully'));
+});
+
 
 const updateProfile = asyncHandler(async (req, res) => {
   const { name, currentPassword, newPassword } = req.body;
@@ -400,6 +450,8 @@ export {
   profile,
   getScheduleByDate,
   createEvent,
+  updateEvent,
+  deleteEvent,
   updateProfile,
   updateProfilePicture,
   addAcademicGoal,

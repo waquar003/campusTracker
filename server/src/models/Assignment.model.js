@@ -9,7 +9,7 @@ const assignmentSchema = new mongoose.Schema({
     required: true,
   },
   deadline: { type: Date, required: true },
-  points: { type: Number, default: 0 },
+  auraPoints: { type: Number, default: 0 },
   completed: { type: Boolean, default: false },
 });
 

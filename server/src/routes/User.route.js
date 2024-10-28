@@ -38,7 +38,9 @@ router.route('/login').post(loginUser);
 router.route('/logout').post(verifyJWT, logoutUser);
 router.route('/dashboard').post(verifyJWT, profile);
 router.route('/schedule').post(verifyJWT, getScheduleByDate);
-router.route('/event').post(verifyJWT, createEvent);
+router.post('/events', verifyJWT, createEvent);
+router.put('/events/:eventId', verifyJWT, updateEvent);
+router.delete('/events/:eventId', verifyJWT, deleteEvent);
 
 router.route('/update-profile').patch(verifyJWT, updateProfile);
 router

@@ -14,22 +14,31 @@ const userSchema = new mongoose.Schema(
     schedule: [
       {
         id: String,
+        title: String,
+        start: Date,
+        end: Date,
+        type: {
+          type: String,
+          enum: ['lecture', 'assignment', 'study', 'event'],
+          required: true
+        },
         location: String,
-        activity: String,
-        date: {
-          type: Date,
-          required: true,
-          index: true,
-        },
-        startTime: {
-          type: String,
-          required: true,
-        },
-        endTime: {
-          type: String,
-          required: true,
-        },
-      },
+        recurring: {
+          days: [{
+            type: String,
+            enum: [
+                'sunday',
+                'monday',
+                'tuesday',
+                'wednesday',
+                'thursday',
+                'friday',
+                'saturday',
+            ]
+          }],
+          until: Date
+        }
+      }
     ],
     academicGoals: [
       {
