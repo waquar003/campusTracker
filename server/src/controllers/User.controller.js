@@ -17,14 +17,14 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'User already exists');
   }
 
-  const profilePictureLocalPath = req.files.profilePicture[0].path;
-  const profilePicture = await uploadOnCloudinary(profilePictureLocalPath);
+  const defaultProfilePicture =
+    'https://res.cloudinary.com/dx9cokbaj/image/upload/v1730399953/cytpla2ebylvczzhoapq.png';
 
   const user = await User.create({
     name,
     email,
     password,
-    profilePicture: profilePicture.url,
+    profilePicture: defaultProfilePicture,
   });
 
   const createdUser = await User.findById(user._id).select('-password');
@@ -57,7 +57,7 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Incorrect password');
   }
 
-  const accessToken = user.generateAccesToken();
+  const accessToken = user.generateAccessToken();
 
   const loggedInUser = await User.findById(user._id).select('-password');
 

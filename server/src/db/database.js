@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const DB_NAME = 'collegeTracker';
+const DB_NAME = 'campusTracker';
 
 const connectDB = async () => {
   try {
