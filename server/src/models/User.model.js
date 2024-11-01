@@ -12,37 +12,7 @@ const userSchema = new mongoose.Schema(
     auraPoints: { type: Number, default: 0 },
     courses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }],
     studyGroups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'StudyGroup' }],
-    schedule: [
-      {
-        id: String,
-        title: String,
-        start: Date,
-        end: Date,
-        type: {
-          type: String,
-          enum: ['lecture', 'assignment', 'study', 'event'],
-          required: true,
-        },
-        location: String,
-        recurring: {
-          days: [
-            {
-              type: String,
-              enum: [
-                'sunday',
-                'monday',
-                'tuesday',
-                'wednesday',
-                'thursday',
-                'friday',
-                'saturday',
-              ],
-            },
-          ],
-          until: Date,
-        },
-      },
-    ],
+    schedule: { type: mongoose.Schema.Types.ObjectId, ref: 'Schedule' },
     academicGoals: [
       {
         id: String,

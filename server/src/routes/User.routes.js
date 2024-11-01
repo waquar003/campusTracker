@@ -5,8 +5,6 @@ import {
   logoutUser,
   profile,
   registerUser,
-  getScheduleByDate,
-  createEvent,
   updateProfile,
   updateProfilePicture,
   addAcademicGoal,
@@ -17,8 +15,6 @@ import {
   updateAssignment,
   deleteAssignment,
   getAllAssignments,
-  deleteEvent,
-  updateEvent,
 } from '../controllers/User.controller.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 
@@ -31,10 +27,6 @@ router.route('/login').post(loginUser);
 //secured Routes
 router.route('/logout').post(verifyJWT, logoutUser);
 router.route('/profile').get(verifyJWT, profile);
-router.route('/schedule').post(verifyJWT, getScheduleByDate);
-router.post('/events', verifyJWT, createEvent);
-router.put('/events/:eventId', verifyJWT, updateEvent);
-router.delete('/events/:eventId', verifyJWT, deleteEvent);
 
 router.route('/update-profile').patch(verifyJWT, updateProfile);
 router
