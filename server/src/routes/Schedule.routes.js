@@ -9,7 +9,7 @@ import {
 
 const router = express.Router();
 
-router.route('/').post(verifyJWT, getScheduleByDate);
+router.route('/').get(verifyJWT, getScheduleByDate);
 router.post('/events', verifyJWT, createEvent);
 router.put('/events/:eventId', verifyJWT, updateEvent);
 router.delete('/events/:eventId', verifyJWT, deleteEvent);
