@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Calendar as ShadcnCalendar } from '@/components/ui/calendar';
+
 import { format, isSameDay, parse } from 'date-fns';
 import {
   fetchSchedules,
@@ -39,6 +40,7 @@ interface Event {
     until: Date;
   };
 }
+
 const EventForm = ({
   event,
   onSubmit,
@@ -52,6 +54,7 @@ const EventForm = ({
     title: event?.title || '',
     type: event?.type || 'event',
     location: event?.location || '',
+
     startDate: event?.start ? format(new Date(event.start), 'yyyy-MM-dd') : '',
     startTime: event?.start ? format(new Date(event.start), 'HH:mm') : '',
     endDate: event?.end ? format(new Date(event.end), 'yyyy-MM-dd') : '',
@@ -60,6 +63,7 @@ const EventForm = ({
     recurringDays: event?.recurring?.days || [],
     recurringUntil: event?.recurring?.until
       ? format(new Date(event.recurring.until), 'yyyy-MM-dd')
+
       : '',
   });
 
@@ -74,6 +78,7 @@ const EventForm = ({
       title: formData.title,
       type: formData.type as Event['type'],
       location: formData.location,
+
       start: startDateTime.toISOString(),
       end: endDateTime.toISOString(),
       recurring:
@@ -86,6 +91,7 @@ const EventForm = ({
     };
 
     onSubmit(eventData);
+
   };
 
   return (
@@ -239,7 +245,9 @@ const EventForm = ({
               }
               className="mt-1 block w-full rounded-md border p-2"
               required={formData.isRecurring}
+
               min={formData.startDate}
+
             />
           </div>
         </>
@@ -263,6 +271,8 @@ const EventForm = ({
     </form>
   );
 };
+
+
 const Schedule = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -359,6 +369,7 @@ const Schedule = () => {
     }
   };
 
+
   const getEventColor = (type: string) => {
     const colors = {
       lecture: {
@@ -388,6 +399,7 @@ const Schedule = () => {
     };
     return colors[type] || colors.event;
   };
+
 
   if (loading) {
     return (
@@ -430,7 +442,9 @@ const Schedule = () => {
             <ShadcnCalendar
               mode="single"
               selected={date}
+
               onSelect={handleDateChange}
+
               className="rounded-md border"
             />
           </CardContent>
@@ -442,8 +456,10 @@ const Schedule = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
+.
               {events && events.length > 0 ? (
                 events.map((event) => (
+
                   <div
                     key={event.id}
                     className={`p-4 rounded-lg border ${getEventColor(event.type).bg} ${getEventColor(event.type).text} ${getEventColor(event.type).border} ${getEventColor(event.type).hover} transition-shadow`}
@@ -452,6 +468,7 @@ const Schedule = () => {
                       <div>
                         <h3 className="font-medium">{event.title}</h3>
                         <p className="text-sm text-gray-500">
+
                           {new Date(event.start).toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit',
@@ -463,21 +480,26 @@ const Schedule = () => {
                             minute: '2-digit',
                             hour12: true,
                           })}
+
                         </p>
                         {event.location && (
                           <p className="text-sm text-gray-500">
                             {event.location}
                           </p>
                         )}
+
                         {event.recurring?.days?.length > 0 && (
                           <p className="text-sm text-blue-600">
                             Recurring every {event.recurring.days.join(', ')}
+
                           </p>
                         )}
                       </div>
                       <div className="flex gap-2">
                         <button
+
                           onClick={() => handleEditClick(event)}
+
                           className="text-gray-600 hover:bg-gray-100 p-2 rounded"
                         >
                           Edit

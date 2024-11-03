@@ -21,6 +21,7 @@ import AuthPage from './components/AuthPage';
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+
   // const isDevelopment = true;
 
   // if (isDevelopment) {
@@ -38,7 +39,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
 
 const App: React.FC = () => {
   const handleAuthSuccess = () => {
-    window.location.href = '/';
+ window.location.href = '/';
   };
 
   return (
