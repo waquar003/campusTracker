@@ -17,14 +17,14 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'User already exists');
   }
 
-  const profilePictureLocalPath = req.files.profilePicture[0].path;
-  const profilePicture = await uploadOnCloudinary(profilePictureLocalPath);
+  const defaultProfilePicture =
+    'https://res.cloudinary.com/dx9cokbaj/image/upload/v1730399953/cytpla2ebylvczzhoapq.png';
 
   const user = await User.create({
     name,
     email,
     password,
-    profilePicture: profilePicture.url,
+    profilePicture: defaultProfilePicture,
   });
 
   const createdUser = await User.findById(user._id).select('-password');
@@ -57,7 +57,7 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Incorrect password');
   }
 
-  const accessToken = user.generateAccesToken();
+  const accessToken = user.generateAccessToken();
 
   const loggedInUser = await User.findById(user._id).select('-password');
 
@@ -65,6 +65,7 @@ const loginUser = asyncHandler(async (req, res) => {
     httpOnly: true,
     expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
     secure: true,
+    sameSite: 'None',
   };
 
   res
@@ -96,112 +97,6 @@ const profile = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, user, 'User fetched successfully'));
-});
-
-const getScheduleByDate = asyncHandler(async (req, res) => {
-  const { date } = req.query;
-  const user = await User.findById(req.user._id);
-
-  if (!user) {
-    throw new ApiError(404, 'User not found');
-  }
-
-  const selectedDate = new Date(date);
-
-  const dailySchedule = user.schedule
-    .filter((item) => {
-      const itemDate = new Date(item.date);
-      return itemDate.toDateString() === selectedDate.toDateString();
-    })
-    .sort((a, b) => a.startTime.localeCompare(b.startTime));
-
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        dailySchedule,
-        'Daily schedule retrieved successfully'
-      )
-    );
-});
-
-const createEvent = asyncHandler(async (req, res) => {
-  const { title, start, end, type, location, recurring } = req.body;
-  const user = await User.findById(req.user._id);
-
-  if (!user) {
-    throw new ApiError(404, 'User not found');
-  }
-
-  if (!title || !start || !end || !type) {
-    throw new ApiError(400, 'Required fields missing');
-  }
-
-  const newEvent = {
-    id: Date.now().toString(),
-    title,
-    start: new Date(start),
-    end: new Date(end),
-    type,
-    location,
-    recurring,
-  };
-
-  user.schedule.push(newEvent);
-  await user.save();
-
-  return res
-    .status(201)
-    .json(new ApiResponse(201, newEvent, 'Event created successfully'));
-});
-
-const updateEvent = asyncHandler(async (req, res) => {
-  const { eventId } = req.params;
-  const { title, start, end, type, location, recurring } = req.body;
-  const user = await User.findById(req.user._id);
-
-  if (!user) {
-    throw new ApiError(404, 'User not found');
-  }
-
-  const eventIndex = user.schedule.findIndex((event) => event.id === eventId);
-  if (eventIndex === -1) {
-    throw new ApiError(404, 'Event not found');
-  }
-
-  const updatedEvent = {
-    ...user.schedule[eventIndex],
-    title,
-    start: new Date(start),
-    end: new Date(end),
-    type,
-    location,
-    recurring,
-  };
-
-  user.schedule[eventIndex] = updatedEvent;
-  await user.save();
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, updatedEvent, 'Event updated successfully'));
-});
-
-const deleteEvent = asyncHandler(async (req, res) => {
-  const { eventId } = req.params;
-  const user = await User.findById(req.user._id);
-
-  if (!user) {
-    throw new ApiError(404, 'User not found');
-  }
-
-  user.schedule = user.schedule.filter((event) => event.id !== eventId);
-  await user.save();
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, null, 'Event deleted successfully'));
 });
 
 const updateProfile = asyncHandler(async (req, res) => {
@@ -447,10 +342,6 @@ export {
   loginUser,
   logoutUser,
   profile,
-  getScheduleByDate,
-  createEvent,
-  updateEvent,
-  deleteEvent,
   updateProfile,
   updateProfilePicture,
   addAcademicGoal,

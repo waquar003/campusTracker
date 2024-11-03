@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
@@ -8,8 +10,15 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Calendar as ShadcnCalendar } from '@/components/ui/calendar';
-import { Clock } from 'lucide-react';
-import { format, isSameDay } from 'date-fns';
+
+import { format, isSameDay, parse } from 'date-fns';
+import {
+  fetchSchedules,
+  createSchedule,
+  updateSchedule,
+  deleteSchedule,
+} from '@/store/slices/scheduleSlice';
+import { RootState } from '@reduxjs/toolkit/query';
 
 interface Event {
   id: string;
@@ -45,14 +54,16 @@ const EventForm = ({
     title: event?.title || '',
     type: event?.type || 'event',
     location: event?.location || '',
-    startDate: event?.start ? format(event.start, 'yyyy-MM-dd') : '',
-    startTime: event?.start ? format(event.start, 'HH:mm') : '',
-    endDate: event?.end ? format(event.end, 'yyyy-MM-dd') : '',
-    endTime: event?.end ? format(event.end, 'HH:mm') : '',
-    isRecurring: !!event?.recurring,
+
+    startDate: event?.start ? format(new Date(event.start), 'yyyy-MM-dd') : '',
+    startTime: event?.start ? format(new Date(event.start), 'HH:mm') : '',
+    endDate: event?.end ? format(new Date(event.end), 'yyyy-MM-dd') : '',
+    endTime: event?.end ? format(new Date(event.end), 'HH:mm') : '',
+    isRecurring: Boolean(event?.recurring?.days?.length),
     recurringDays: event?.recurring?.days || [],
     recurringUntil: event?.recurring?.until
-      ? format(event.recurring.until, 'yyyy-MM-dd')
+      ? format(new Date(event.recurring.until), 'yyyy-MM-dd')
+
       : '',
   });
 
@@ -67,19 +78,20 @@ const EventForm = ({
       title: formData.title,
       type: formData.type as Event['type'],
       location: formData.location,
-      start: startDateTime,
-      end: endDateTime,
+
+      start: startDateTime.toISOString(),
+      end: endDateTime.toISOString(),
+      recurring:
+        formData.isRecurring && formData.recurringDays.length > 0
+          ? {
+              days: formData.recurringDays,
+              until: new Date(formData.recurringUntil).toISOString(),
+            }
+          : { days: [] },
     };
 
-    if (formData.isRecurring && formData.recurringDays.length > 0) {
-      eventData.recurring = {
-        days: formData.recurringDays,
-        until: new Date(formData.recurringUntil),
-      };
-    }
-
     onSubmit(eventData);
-    onClose();
+
   };
 
   return (
@@ -233,6 +245,9 @@ const EventForm = ({
               }
               className="mt-1 block w-full rounded-md border p-2"
               required={formData.isRecurring}
+
+              min={formData.startDate}
+
             />
           </div>
         </>
@@ -257,59 +272,103 @@ const EventForm = ({
   );
 };
 
+
 const Schedule = () => {
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  // Initialize date from URL or current date
+  const initialDate = searchParams.get('date')
+    ? new Date(searchParams.get('date'))
+    : new Date();
+
+  const [date, setDate] = useState(initialDate);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingEvent, setEditingEvent] = useState<Event | undefined>();
-  const [events, setEvents] = useState<Event[]>([]);
+  const [editingEvent, setEditingEvent] = useState(undefined);
 
-  const handleCreate = (data: Partial<Event>) => {
-    const newEvent = {
-      ...data,
-      id: Date.now().toString(),
-    } as Event;
-    setEvents([...events, newEvent]);
-  };
+  const dispatch = useDispatch();
+  //TODO: Check for it
+  // const { isAuthenticated } = useSelector((state:RootState) => state.auth);
+  const isAuthenticated = localStorage.getItem('isAuthenticated');
+  const { schedules: events, loading } = useSelector((state) => state.schedule);
 
-  const handleEdit = (data: Partial<Event>) => {
-    setEvents(
-      events.map((e) => (e.id === editingEvent?.id ? { ...e, ...data } : e))
-    );
-    setEditingEvent(undefined);
-  };
-
-  const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this event?')) {
-      setEvents(events.filter((e) => e.id !== id));
+  // Update URL when date changes
+  const handleDateChange = (newDate: Date | undefined) => {
+    if (newDate && !isNaN(newDate.getTime())) {
+      const formattedDate = format(newDate, 'yyyy-MM-dd');
+      setSearchParams({ date: formattedDate });
+      setDate(newDate);
     }
   };
 
-  const getDayEvents = (date: Date | undefined) => {
-    if (!date) return [];
-    return events
-      .filter((event) => {
-        if (isSameDay(event.start, date)) return true;
-        if (event.recurring) {
-          const eventDay = event.start.getDay();
-          const selectedDay = date.getDay();
-          return (
-            event.recurring.days.includes(
-              [
-                'sunday',
-                'monday',
-                'tuesday',
-                'wednesday',
-                'thursday',
-                'friday',
-                'saturday',
-              ][selectedDay]
-            ) && date <= event.recurring.until
-          );
-        }
-        return false;
-      })
-      .sort((a, b) => a.start.getTime() - b.start.getTime());
+  // Fetch schedules when date or auth status changes
+  useEffect(() => {
+    console.log('Schedule.tsx: ', date, isAuthenticated);
+    if (isAuthenticated && date) {
+      console.log('Fetching schedule for date:', format(date, 'yyyy-MM-dd'));
+      dispatch(fetchSchedules(format(date, 'yyyy-MM-dd')));
+    }
+  }, [date, dispatch, isAuthenticated]);
+
+  // Sync with URL parameters
+  useEffect(() => {
+    const urlDate = searchParams.get('date');
+    if (urlDate) {
+      const parsedDate = new Date(urlDate);
+      if (!isNaN(parsedDate.getTime()) && !isSameDay(parsedDate, date)) {
+        setDate(parsedDate);
+      }
+    }
+  }, [searchParams]);
+
+  const handleCreate = async (data) => {
+    await dispatch(createSchedule(data));
+    setIsDialogOpen(false);
   };
+
+  const handleEditClick = (event) => {
+    console.log('Editing event:', event); // Debug log
+    setEditingEvent({
+      ...event,
+      start: new Date(event.start),
+      end: new Date(event.end),
+      recurring: {
+        days: event.recurring?.days || [],
+        until: event.recurring?.until ? new Date(event.recurring.until) : null,
+      },
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleEdit = async (data) => {
+    console.log('Edit triggered with data:', data);
+    console.log(editingEvent);
+    if (editingEvent?._id) {
+      const updateData = {
+        id: editingEvent._id,
+        data: {
+          title: data.title,
+          start: data.start,
+          end: data.end,
+          type: data.type,
+          location: data.location,
+          recurring: data.recurring || { days: [] },
+        },
+      };
+      console.log('Dispatching update with:', updateData);
+      await dispatch(updateSchedule(updateData));
+      dispatch(fetchSchedules(format(date, 'yyyy-MM-dd')));
+    }
+    setIsDialogOpen(false);
+    setEditingEvent(undefined);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this event?')) {
+      await dispatch(deleteSchedule(id));
+    }
+  };
+
 
   const getEventColor = (type: string) => {
     const colors = {
@@ -340,6 +399,13 @@ const Schedule = () => {
     };
     return colors[type] || colors.event;
   };
+
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">Loading...</div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -376,7 +442,9 @@ const Schedule = () => {
             <ShadcnCalendar
               mode="single"
               selected={date}
-              onSelect={setDate}
+
+              onSelect={handleDateChange}
+
               className="rounded-md border"
             />
           </CardContent>
@@ -388,8 +456,10 @@ const Schedule = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {getDayEvents(date).length > 0 ? (
-                getDayEvents(date).map((event) => (
+.
+              {events && events.length > 0 ? (
+                events.map((event) => (
+
                   <div
                     key={event.id}
                     className={`p-4 rounded-lg border ${getEventColor(event.type).bg} ${getEventColor(event.type).text} ${getEventColor(event.type).border} ${getEventColor(event.type).hover} transition-shadow`}
@@ -398,27 +468,38 @@ const Schedule = () => {
                       <div>
                         <h3 className="font-medium">{event.title}</h3>
                         <p className="text-sm text-gray-500">
-                          {format(event.start, 'HH:mm')} -{' '}
-                          {format(event.end, 'HH:mm')}
+
+                          {new Date(event.start).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true,
+                          })}{' '}
+                          -{' '}
+                          {new Date(event.end).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true,
+                          })}
+
                         </p>
                         {event.location && (
                           <p className="text-sm text-gray-500">
                             {event.location}
                           </p>
                         )}
-                        {event.recurring && (
+
+                        {event.recurring?.days?.length > 0 && (
                           <p className="text-sm text-blue-600">
-                            Recurring every {event.recurring.days.join(', ')}{' '}
-                            until {format(event.recurring.until, 'MMM d, yyyy')}
+                            Recurring every {event.recurring.days.join(', ')}
+
                           </p>
                         )}
                       </div>
                       <div className="flex gap-2">
                         <button
-                          onClick={() => {
-                            setEditingEvent(event);
-                            setIsDialogOpen(true);
-                          }}
+
+                          onClick={() => handleEditClick(event)}
+
                           className="text-gray-600 hover:bg-gray-100 p-2 rounded"
                         >
                           Edit

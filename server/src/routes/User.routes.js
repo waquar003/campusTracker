@@ -5,8 +5,6 @@ import {
   logoutUser,
   profile,
   registerUser,
-  getScheduleByDate,
-  createEvent,
   updateProfile,
   updateProfilePicture,
   addAcademicGoal,
@@ -17,32 +15,18 @@ import {
   updateAssignment,
   deleteAssignment,
   getAllAssignments,
-  deleteEvent,
-  updateEvent,
 } from '../controllers/User.controller.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-router.route('/register').post(
-  upload.fields([
-    {
-      name: 'profilePicture',
-      maxCount: 1,
-    },
-  ]),
-  registerUser
-);
+router.route('/register').post(registerUser);
 
 router.route('/login').post(loginUser);
 
 //secured Routes
 router.route('/logout').post(verifyJWT, logoutUser);
-router.route('/dashboard').post(verifyJWT, profile);
-router.route('/schedule').post(verifyJWT, getScheduleByDate);
-router.post('/events', verifyJWT, createEvent);
-router.put('/events/:eventId', verifyJWT, updateEvent);
-router.delete('/events/:eventId', verifyJWT, deleteEvent);
+router.route('/profile').get(verifyJWT, profile);
 
 router.route('/update-profile').patch(verifyJWT, updateProfile);
 router

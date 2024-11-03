@@ -1,4 +1,6 @@
 import './App.css';
+import { Provider } from 'react-redux';
+import { store } from './store/store.js';
 import {
   BrowserRouter as Router,
   Routes,
@@ -19,11 +21,12 @@ import AuthPage from './components/AuthPage';
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const isDevelopment = true;
 
-  if (isDevelopment) {
-    return <>{children}</>;
-  }
+  // const isDevelopment = true;
+
+  // if (isDevelopment) {
+  //   return <>{children}</>;
+  // }
 
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
 
@@ -36,42 +39,47 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
 
 const App: React.FC = () => {
   const handleAuthSuccess = () => {
-    window.location.href = '/dashboard';
+ window.location.href = '/';
   };
 
   return (
-    <Router>
-      <Routes>
-        <Route
-          path="/auth"
-          element={<AuthPage onAuthSuccess={handleAuthSuccess} />}
-        />
+    <Provider store={store}>
+      <Router>
+        <Routes>
+          <Route
+            path="/auth"
+            element={<AuthPage onAuthSuccess={handleAuthSuccess} />}
+          />
 
-        {/* Protected Routes */}
-        <Route
-          path="/*"
-          element={
-            <ProtectedRoute>
-              <div className="flex min-h-screen">
-                <Navigation />
-                <main className="flex-1 p-8">
-                  <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/schedule" element={<Schedule />} />
-                    <Route path="/groups" element={<StudyGroups />} />
-                    <Route path="/settings" element={<Settings />} />
-                    <Route path="/notifications" element={<Notifications />} />
-                    <Route path="/progress" element={<Progress />} />
-                    <Route path="/goals" element={<AcademicGoals />} />
-                    <Route path="/assignments" element={<Assignments />} />
-                  </Routes>
-                </main>
-              </div>
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </Router>
+          {/* Protected Routes */}
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute>
+                <div className="flex min-h-screen">
+                  <Navigation />
+                  <main className="flex-1 p-8">
+                    <Routes>
+                      <Route path="/" element={<Dashboard />} />
+                      <Route path="/schedule" element={<Schedule />} />
+                      <Route path="/groups" element={<StudyGroups />} />
+                      <Route path="/settings" element={<Settings />} />
+                      <Route
+                        path="/notifications"
+                        element={<Notifications />}
+                      />
+                      <Route path="/progress" element={<Progress />} />
+                      <Route path="/goals" element={<AcademicGoals />} />
+                      <Route path="/assignments" element={<Assignments />} />
+                    </Routes>
+                  </main>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Router>
+    </Provider>
   );
 };
 export default App;
