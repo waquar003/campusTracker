@@ -53,7 +53,7 @@ const Navigation = () => {
           <NavLink to="/goals" icon={Target} label="Academic Goals" />
           <NavLink to="/groups" icon={Users} label="Study Groups" />
           <NavLink to="/notifications" icon={Bell} label="Notifications" />
-          <NavLink to="/settings" icon={Settings} label="Settings" />
+          {/* <NavLink to="/settings" icon={Settings} label="Settings" /> */}
         </div>
       </div>
     </nav>

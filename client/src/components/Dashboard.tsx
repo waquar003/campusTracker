@@ -2,6 +2,16 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
 import {
   Trophy,
   Book,
@@ -13,6 +23,7 @@ import {
   User,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface StatsCardProps {
   title: string;
@@ -43,6 +54,12 @@ interface AcademicGoal {
 }
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+
+  const navigateToProfile = () => {
+    navigate('settings'); // This navigates to the Profile page
+  };
+
   const [goals, setGoals] = useState<AcademicGoal[]>([
     {
       id: '1',
@@ -115,18 +132,30 @@ const Dashboard = () => {
               {userData.auraPoints} XP
             </div>
           </div>
-          <div className="border-l pl-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="flex items-center gap-2 text-gray-600 hover:text-red-600"
-              onClick={handleLogout}
-            >
-              <User className="h-4 w-4" />
-              <span className="font-medium">{firstName}</span>
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Avatar>
+                <AvatarImage src={userData.profilePicture} />
+                <AvatarFallback>{firstName[0]}</AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <button onClick={navigateToProfile}>
+                  <User className="h-4 w-4 inline mr-2" />
+                  <span>Profile</span>
+                </button>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <button onClick={handleLogout} className=" hover:text-red-600">
+                  <LogOut className="h-4 w-4 inline mr-2" />
+                  <span>Logout</span>
+                </button>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
