@@ -98,7 +98,7 @@ const createEvent = asyncHandler(async (req, res) => {
 
 const updateEvent = asyncHandler(async (req, res) => {
   const { eventId } = req.params;
-  console.log('Updating event:', eventId, req.body); // Debug log
+  console.log('Updating event:', eventId, req.body);
 
   const schedule = await Schedule.findOne({ userId: req.user._id });
   if (!schedule) {

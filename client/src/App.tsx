@@ -21,12 +21,6 @@ import AuthPage from './components/AuthPage';
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  // const isDevelopment = true;
-
-  // if (isDevelopment) {
-  //   return <>{children}</>;
-  // }
-
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
 
   if (!isAuthenticated) {

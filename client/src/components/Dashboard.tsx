@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useSelector, useDispatch } from 'react-redux';
+import { format } from 'date-fns';
+import { fetchSchedules } from '../store/slices/scheduleSlice.js';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -95,6 +98,8 @@ const Dashboard = () => {
             },
           }
         );
+        console.log(response.data.data);
+
         setUserData(response.data.data);
       } catch (error) {
         console.log('Error fetching user data:', error);
@@ -111,6 +116,20 @@ const Dashboard = () => {
   };
 
   const firstName = userData.name.split(' ')[0];
+
+  const dispatch = useDispatch();
+  const { schedules, loading, error } = useSelector((state) => state.schedule);
+
+  const [date, setDate] = useState(new Date());
+  useEffect(() => {
+    const todayFormatted = format(date, 'yyyy-MM-dd');
+    dispatch(fetchSchedules(todayFormatted)); // Fetch schedules for the selected date (today)
+  }, [date, dispatch]);
+
+  console.log(schedules);
+
+  const todaysEvents = schedules.length > 3 ? schedules.slice(0, 3) : schedules;
+  console.log(todaysEvents);
 
   return (
     <div className="p-6 space-y-6">
@@ -229,44 +248,40 @@ const Dashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {[
-                {
-                  course: 'Database Systems',
-                  time: '09:00 - 10:30',
-                  room: 'Room 301',
-                  professor: 'Dr. Smith',
-                },
-                {
-                  course: 'Web Development',
-                  time: '11:00 - 12:30',
-                  room: 'Room 205',
-                  professor: 'Prof. Johnson',
-                },
-                {
-                  course: 'Algorithms',
-                  time: '14:00 - 15:30',
-                  room: 'Room 401',
-                  professor: 'Dr. Brown',
-                },
-              ].map((class_, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                >
-                  <div>
-                    <h3 className="font-medium">{class_.course}</h3>
-                    <p className="text-sm text-gray-600">
-                      {class_.time} • {class_.room}
-                    </p>
-                    <p className="text-sm text-gray-600">{class_.professor}</p>
+            {
+              <div className="space-y-4">
+                {todaysEvents.map((event) => (
+                  <div
+                    key={event.id}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
+                    <div>
+                      <h3 className="font-medium">{event.title}</h3>
+                      <p className="text-sm text-gray-600 inline">
+                        {/* {event.start.split("T")[1].split(".")[0].split(":").slice(0,2)} • {event.end.split("T")[1].split(".")[0]} */}
+                        {new Date(event.start).toLocaleTimeString('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: true,
+                        })}
+                      </p>
+                      <p className="text-sm text-gray-600 inline">
+                        -{' '}
+                        {new Date(event.end).toLocaleTimeString('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: true,
+                        })}
+                      </p>
+                      <p className="text-sm text-gray-600">{event.type}</p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Check-in
+                    </Button>
                   </div>
-                  <Button variant="outline" size="sm">
-                    Check-in
-                  </Button>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            }
           </CardContent>
         </Card>
       </div>

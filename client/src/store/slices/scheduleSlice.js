@@ -50,7 +50,7 @@ export const updateSchedule = createAsyncThunk(
   'schedule/updateSchedule',
   async ({ id, data }, { rejectWithValue }) => {
     try {
-      console.log('Updating schedule with:', { id, data }); // Debug log
+      console.log('Updating schedule with:', { id, data });
       const response = await axios.put(`${API_URL}/events/${id}`, data, {
         withCredentials: true,
         headers: {
@@ -90,7 +90,7 @@ const scheduleSlice = createSlice({
     schedules: [],
     loading: false,
     error: null,
-    lastFetchedDate: null, // Add this to track last successful fetch
+    lastFetchedDate: null,
   },
   reducers: {
     clearError: (state) => {
@@ -107,7 +107,7 @@ const scheduleSlice = createSlice({
         state.loading = false;
         state.schedules = action.payload;
         state.error = null;
-        state.lastFetchedDate = new Date().toISOString(); // Track successful fetch
+        state.lastFetchedDate = new Date().toISOString();
       })
       .addCase(fetchSchedules.rejected, (state, action) => {
         state.loading = false;

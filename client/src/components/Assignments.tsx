@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
+  fetchAssignments,
+  createAssignment,
+  updateAssignment,
+  deleteAssignment,
+} from '@/store/slices/assignmentSlice';
+
+import {
   Dialog,
   DialogContent,
   DialogHeader,
