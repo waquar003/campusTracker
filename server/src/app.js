@@ -26,7 +26,10 @@ app.options('*', cors(corsOptions));
 // Add headers to all responses
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', 'http://localhost:5173');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PUT, PATCH, DELETE, OPTIONS'
+  );
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.header('Access-Control-Allow-Credentials', 'true');
   next();
@@ -46,8 +49,10 @@ app.use(cookieParser());
 
 import userRouter from './routes/User.routes.js';
 import scheduleRoutes from './routes/Schedule.routes.js';
+import academicGoalRoutes from './routes/AcademicGoal.routes.js';
 
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/schedule', scheduleRoutes);
+app.use('/api/v1/academic-goals', academicGoalRoutes);
 
 export default app;

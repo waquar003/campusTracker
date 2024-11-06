@@ -13,15 +13,10 @@ const userSchema = new mongoose.Schema(
     courses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }],
     studyGroups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'StudyGroup' }],
     schedule: { type: mongoose.Schema.Types.ObjectId, ref: 'Schedule' },
-    academicGoals: [
-      {
-        id: String,
-        title: String,
-        description: String,
-        deadline: Date,
-        completed: { type: Boolean, default: false },
-      },
-    ],
+    academicGoals: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'AcademicGoal',
+    },
   },
   { timeStamps: true }
 );

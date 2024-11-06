@@ -6,7 +6,6 @@ import { uploadOnCloudinary } from '../utils/cloudinary.js';
 
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
-  console.log(req.body);
 
   if ([name, email, password].includes(undefined)) {
     throw new ApiError(400, 'All fields are required');
@@ -149,92 +148,6 @@ const updateProfilePicture = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, 'Profile picture updated successfully'));
 });
 
-const addAcademicGoal = asyncHandler(async (req, res) => {
-  const { title, description, deadline } = req.body;
-  const user = await User.findById(req.user._id);
-
-  if (!user) {
-    throw new ApiError(404, 'User not found');
-  }
-
-  const newGoal = {
-    id: Date.now().toString(),
-    title,
-    description,
-    deadline: new Date(deadline),
-    completed: false,
-  };
-
-  user.academicGoals.push(newGoal);
-  await user.save();
-
-  return res
-    .status(201)
-    .json(new ApiResponse(201, newGoal, 'Academic goal added successfully'));
-});
-
-const getAcademicGoals = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id);
-
-  if (!user) {
-    throw new ApiError(404, 'User not found');
-  }
-
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        user.academicGoals,
-        'Academic goals retrieved successfully'
-      )
-    );
-});
-
-const markGoalComplete = asyncHandler(async (req, res) => {
-  const { goalId } = req.params;
-  const user = await User.findById(req.user._id);
-
-  if (!user) {
-    throw new ApiError(404, 'User not found');
-  }
-
-  const goalIndex = user.academicGoals.findIndex((goal) => goal.id === goalId);
-
-  if (goalIndex === -1) {
-    throw new ApiError(404, 'Goal not found');
-  }
-
-  user.academicGoals[goalIndex].completed = true;
-  await user.save();
-
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        user.academicGoals[goalIndex],
-        'Goal marked as complete'
-      )
-    );
-});
-
-const deleteAcademicGoal = asyncHandler(async (req, res) => {
-  const { goalId } = req.params;
-  const user = await User.findById(req.user._id);
-
-  if (!user) {
-    throw new ApiError(404, 'User not found');
-  }
-
-  user.academicGoals = user.academicGoals.filter((goal) => goal.id !== goalId);
-  await user.save();
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, null, 'Academic goal deleted successfully'));
-});
-
 const createAssignment = asyncHandler(async (req, res) => {
   const { title, course, dueDate, description, priority, auraPoints } =
     req.body;
@@ -345,10 +258,6 @@ export {
   profile,
   updateProfile,
   updateProfilePicture,
-  addAcademicGoal,
-  getAcademicGoals,
-  markGoalComplete,
-  deleteAcademicGoal,
   createAssignment,
   updateAssignment,
   deleteAssignment,

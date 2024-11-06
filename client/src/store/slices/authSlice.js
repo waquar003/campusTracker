@@ -6,14 +6,14 @@ const API_URL = 'http://localhost:4000/api/v1/user';
 export const register = createAsyncThunk(
   'auth/register',
   async ({ name, email, password }) => {
-    console.log(name);
+    // console.log(name);
 
     const response = await axios.post(`${API_URL}/register`, {
       name,
       email,
       password,
     });
-    console.log(response.data);
+    // console.log(response.data);
 
     return response.data.data;
   }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Target,
@@ -8,6 +8,13 @@ import {
   X,
   Trash2,
 } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  fetchAcademicGoals,
+  createAcademicGoal,
+  markGoalComplete,
+  deleteAcademicGoal,
+} from '@/store/slices/AcademicGoalSlice';
 
 interface Goal {
   id: string;
@@ -123,44 +130,30 @@ const NewGoalModal = ({
 
 const AcademicGoals = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [goals, setGoals] = useState<Goal[]>([
-    {
-      id: '1',
-      title: 'Complete Database Project',
-      description: 'Finish the final project for Database Systems course',
-      deadline: new Date('2024-05-15'),
-      completed: false,
-    },
-    {
-      id: '2',
-      title: 'Maintain 3.5 GPA',
-      description: 'Keep semester GPA above 3.5',
-      deadline: new Date('2024-06-30'),
-      completed: false,
-    },
-  ]);
+  const dispatch = useDispatch();
 
-  const toggleGoalCompletion = (goalId: string) => {
-    setGoals(
-      goals.map((goal) =>
-        goal.id === goalId ? { ...goal, completed: !goal.completed } : goal
-      )
-    );
+  const goals = useSelector((state: any) => state.academicGoals.goals) || [];
+
+  console.log(goals);
+
+  //TODO: add the feature to immediately show the marked goals
+  useEffect(() => {
+    dispatch(fetchAcademicGoals());
+  }, [dispatch]);
+
+  const toggleGoalCompletion = async (goalId: string) => {
+    await dispatch(markGoalComplete(goalId));
   };
 
-  const handleAddGoal = (newGoal: Omit<Goal, 'id' | 'completed'>) => {
-    setGoals([
-      ...goals,
-      {
-        ...newGoal,
-        id: Date.now().toString(),
-        completed: false,
-      },
-    ]);
+  const handleAddGoal = async (newGoal: Omit<Goal, 'id' | 'completed'>) => {
+    await dispatch(createAcademicGoal(newGoal));
+    setIsModalOpen(false);
   };
 
-  const deleteGoal = (goalId: string) => {
-    setGoals(goals.filter((goal) => goal.id !== goalId));
+  const deleteGoal = async (goalId: string) => {
+    if (window.confirm('Are you sure you want to delete this goal?')) {
+      await dispatch(deleteAcademicGoal(goalId));
+    }
   };
 
   return (
@@ -206,7 +199,7 @@ const AcademicGoals = () => {
             <CardContent>
               <p className="text-gray-600 mb-2">{goal.description}</p>
               <p className="text-sm text-gray-500">
-                Deadline: {goal.deadline.toLocaleDateString()}
+                Deadline: {new Date(goal.deadline).toLocaleDateString()}
               </p>
             </CardContent>
           </Card>

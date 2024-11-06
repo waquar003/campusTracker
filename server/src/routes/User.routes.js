@@ -7,10 +7,6 @@ import {
   registerUser,
   updateProfile,
   updateProfilePicture,
-  addAcademicGoal,
-  getAcademicGoals,
-  markGoalComplete,
-  deleteAcademicGoal,
   createAssignment,
   updateAssignment,
   deleteAssignment,
@@ -32,14 +28,6 @@ router.route('/update-profile').patch(verifyJWT, updateProfile);
 router
   .route('/update-profile-picture')
   .patch(verifyJWT, upload.single('profilePicture'), updateProfilePicture);
-
-// Academic Goals routes
-router.route('/academic-goals').get(verifyJWT, getAcademicGoals);
-router.route('/academic-goals').post(verifyJWT, addAcademicGoal);
-router
-  .route('/academic-goals/:goalId/complete')
-  .patch(verifyJWT, markGoalComplete);
-router.route('/academic-goals/:goalId').delete(verifyJWT, deleteAcademicGoal);
 
 router.route('/assignments').get(verifyJWT, getAllAssignments);
 router.route('/assignments').post(verifyJWT, createAssignment);
