@@ -6,6 +6,7 @@ import { fetchSchedules } from '../store/slices/scheduleSlice.js';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { fetchUserData } from '../store/slices/authSlice.js';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,6 +64,11 @@ const Dashboard = () => {
     navigate('settings'); // This navigates to the Profile page
   };
 
+  const dispatch = useDispatch();
+  const { user: userData } = useSelector((state) => state.auth);
+  const { schedules } = useSelector((state) => state.schedule);
+  const [date, setDate] = useState(new Date());
+
   const [goals, setGoals] = useState<AcademicGoal[]>([
     {
       id: '1',
@@ -80,34 +86,24 @@ const Dashboard = () => {
     },
   ]);
 
-  const [userData, setUserData] = useState({
-    name: '',
-    level: 1,
-    auraPoints: 0,
-  });
+  // const [userData, setUserData] = useState({
+  //   name: '',
+  //   level: 1,
+  //   auraPoints: 0,
+  // });
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem('accessToken');
-        const response = await axios.get(
-          'http://localhost:4000/api/v1/user/profile',
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        console.log(response.data.data);
+    dispatch(fetchUserData());
+  }, [dispatch]);
 
-        setUserData(response.data.data);
-      } catch (error) {
-        console.log('Error fetching user data:', error);
-      }
-    };
+  useEffect(() => {
+    const todayFormatted = format(date, 'yyyy-MM-dd');
+    dispatch(fetchSchedules(todayFormatted)); // Fetch schedules for the selected date (today)
+  }, [date, dispatch]);
 
-    fetchUserData();
-  }, []);
+  if (!userData) {
+    return <div>Loading...</div>;
+  }
 
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
@@ -116,15 +112,6 @@ const Dashboard = () => {
   };
 
   const firstName = userData.name.split(' ')[0];
-
-  const dispatch = useDispatch();
-  const { schedules, loading, error } = useSelector((state) => state.schedule);
-
-  const [date, setDate] = useState(new Date());
-  useEffect(() => {
-    const todayFormatted = format(date, 'yyyy-MM-dd');
-    dispatch(fetchSchedules(todayFormatted)); // Fetch schedules for the selected date (today)
-  }, [date, dispatch]);
 
   console.log(schedules);
 

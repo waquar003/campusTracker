@@ -1,6 +1,9 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useState, useRef } from 'react';
-import { updateProfile } from '../store/slices/authSlice.js';
+import {
+  updateProfile,
+  updateProfilePicture,
+} from '../store/slices/authSlice.js';
 import { RootState } from '../store/store.js';
 
 const Settings = () => {
@@ -12,7 +15,8 @@ const Settings = () => {
     currentPassword: '',
     newPassword: '',
   });
-  const [profileImage, setProfileImage] = useState(user?.profilePicture || '');
+
+  const profileImage = user?.profilePicture || '';
 
   const handleImageClick = () => {
     fileInputRef.current?.click();
@@ -21,9 +25,9 @@ const Settings = () => {
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const formData = new FormData();
-      formData.append('profilePicture', file);
-      dispatch(updateProfile(formData));
+      // const formData = new FormData();
+      // formData.append('profilePicture', file);
+      dispatch(updateProfilePicture(file));
     }
   };
 
@@ -53,7 +57,7 @@ const Settings = () => {
                   onClick={handleImageClick}
                 >
                   <img
-                    src={profileImage || '/default-avatar.png'}
+                    src={profileImage || './default.png'}
                     alt="Profile"
                     className="w-full h-full object-cover"
                   />

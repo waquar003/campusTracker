@@ -12,7 +12,10 @@ const userSchema = new mongoose.Schema(
     auraPoints: { type: Number, default: 0 },
     courses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }],
     studyGroups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'StudyGroup' }],
-    schedule: { type: mongoose.Schema.Types.ObjectId, ref: 'Schedule' },
+    schedule: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Schedule',
+    },
     academicGoals: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'AcademicGoal',
