@@ -47,7 +47,7 @@ const markGoalComplete = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'Goal not found');
   }
 
-  goal.goals[goalIndex].completed = !goal.goals[goalIndex].completed;
+  goal.goals[goalIndex].completed = true;
   await goal.save();
 
   return res

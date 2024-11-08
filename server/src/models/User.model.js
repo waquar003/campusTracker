@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema(
     profilePicture: String,
     level: { type: Number, default: 1 },
     auraPoints: { type: Number, default: 0 },
-    courses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }],
+    assignments: { type: mongoose.Schema.Types.ObjectId, ref: 'Assignment' },
     studyGroups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'StudyGroup' }],
     schedule: {
       type: mongoose.Schema.Types.ObjectId,

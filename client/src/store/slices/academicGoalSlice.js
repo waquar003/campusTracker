@@ -87,7 +87,7 @@ const academicGoalSlice = createSlice({
           (goal) => goal.id === action.payload.id
         );
         if (goalIndex !== -1) {
-          state.goals[goalIndex].completed = !state.goals[goalIndex].completed;
+          state.goals[goalIndex].completed = true;
         }
       })
       .addCase(deleteAcademicGoal.fulfilled, (state, action) => {
