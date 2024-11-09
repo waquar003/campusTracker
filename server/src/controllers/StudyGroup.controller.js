@@ -2,6 +2,7 @@ import { StudyGroup } from '../models/StudyGroup.model.js';
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { User } from '../models/User.model.js';
 
 export const studyGroupController = {
   createGroup: asyncHandler(async (req, res) => {
@@ -11,6 +12,20 @@ export const studyGroupController = {
       throw new ApiError(400, 'All fields are required');
     }
 
+    //Example for upcoming sessions
+    //TODO: Need to be removed later
+    const upcomingSessions = [
+      {
+        id: '1',
+        topic: 'Query Optimization',
+        startTime: new Date(2024, 9, 27, 14, 0),
+        duration: 90,
+        participants: 4,
+        maxParticipants: 8,
+        meetingLink: 'https://meet.google.com/your-meeting-id',
+      },
+    ];
+
     const newGroup = new StudyGroup({
       name,
       subject,
@@ -18,9 +33,16 @@ export const studyGroupController = {
       creator: req.user._id,
       members: [req.user._id],
       tags,
+      studySessions: upcomingSessions, //TODO: Need to be removed later
     });
 
     const savedGroup = await newGroup.save();
+    await User.findByIdAndUpdate(
+      req.user._id,
+      { $push: { studyGroups: savedGroup._id } },
+      { new: true }
+    );
+    // console.log(savedGroup)
 
     return res
       .status(201)
@@ -30,9 +52,9 @@ export const studyGroupController = {
   }),
 
   getAllGroups: asyncHandler(async (req, res) => {
-    const groups = await StudyGroup.find()
-      .populate('creator', 'name email')
-      .populate('members', 'name email');
+    const groups = await StudyGroup.find();
+    // .populate('creator', 'name email')
+    // .populate('members', 'name email');
 
     return res
       .status(200)
@@ -54,6 +76,12 @@ export const studyGroupController = {
     if (!group.members.includes(req.user._id)) {
       group.members.push(req.user._id);
       await group.save();
+
+      await User.findByIdAndUpdate(
+        req.user._id,
+        { $push: { studyGroups: groupId } },
+        { new: true }
+      );
     }
 
     return res

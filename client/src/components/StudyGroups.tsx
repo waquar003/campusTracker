@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Clock, Plus, X } from 'lucide-react';
 import {
@@ -10,6 +10,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  createGroup,
+  joinGroup,
+  fetchGroup,
+} from '../store/slices/studyGroupSlice.js';
 
 interface StudyGroup {
   id: string;
@@ -55,6 +61,7 @@ const StudyGroups = () => {
     },
   ]);
   const [joinedGroupIds, setJoinedGroupIds] = useState<string[]>([]);
+
   const [upcomingSessions] = useState<StudySession[]>([
     {
       id: '1',
@@ -66,13 +73,22 @@ const StudyGroups = () => {
       meetLink: 'https://meet.google.com/your-meeting-id',
     },
   ]);
+  useEffect(() => {
+    dispatch(fetchGroup());
+  }, []);
+
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  const { groups } = useSelector((state) => state.studyGroups);
+
+  console.log(groups);
 
   const handleCreateGroup = () => {
-    const newGroupData: StudyGroup = {
-      id: (activeGroups.length + 1).toString(),
+    const newGroupData = {
       name: newGroup.name,
       subject: newGroup.subject,
       members: 1,
+      creator: user._id,
       maxMembers: 8,
       level: 1,
       nextSession: new Date(),
@@ -80,22 +96,15 @@ const StudyGroups = () => {
       tags: newGroup.tags.split(',').map((tag) => tag.trim()),
     };
 
-    setActiveGroups([...activeGroups, newGroupData]);
+    dispatch(createGroup(newGroupData));
+    // setActiveGroups([...activeGroups, newGroupData]);
     setNewGroup({ name: '', subject: '', description: '', tags: '' });
     setIsCreateModalOpen(false);
   };
 
   const handleJoinGroup = (groupId: string) => {
-    if (!joinedGroupIds.includes(groupId)) {
-      setJoinedGroupIds([...joinedGroupIds, groupId]);
-      setActiveGroups(
-        activeGroups.map((group) =>
-          group.id === groupId
-            ? { ...group, members: group.members + 1 }
-            : group
-        )
-      );
-    }
+    dispatch(joinGroup(groupId));
+    user.studyGroups.push(user._id);
   };
 
   return (
@@ -117,18 +126,18 @@ const StudyGroups = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-4">
           {/* My Groups */}
-          {joinedGroupIds.length > 0 && (
+          {user.studyGroups.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>My Groups</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {activeGroups
-                    .filter((group) => joinedGroupIds.includes(group.id))
+                  {groups
+                    .filter((groups) => groups.members.includes(user._id))
                     .map((group) => (
                       <div
-                        key={group.id}
+                        key={group._id}
                         className="p-4 border rounded-lg border-blue-200 transition-colors"
                       >
                         <div className="flex justify-between items-start">
@@ -143,7 +152,7 @@ const StudyGroups = () => {
                               Level {group.level}
                             </span>
                             <span className="bg-green-100 text-green-600 px-2 py-1 rounded text-sm">
-                              {group.members}/{group.maxMembers}
+                              {group.members.length}/{group.maxMembers}
                             </span>
                           </div>
                         </div>
@@ -163,12 +172,15 @@ const StudyGroups = () => {
                         <div className="mt-4 flex justify-between items-center">
                           <div className="text-sm text-gray-600">
                             Next session:{' '}
-                            {group.nextSession.toLocaleString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
+                            {new Date(group.nextSession).toLocaleString(
+                              'en-US',
+                              {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              }
+                            )}
                           </div>
                         </div>
                       </div>
@@ -185,11 +197,11 @@ const StudyGroups = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {activeGroups
-                  .filter((group) => !joinedGroupIds.includes(group.id))
+                {groups
+                  .filter((groups) => !groups.members.includes(user._id))
                   .map((group) => (
                     <div
-                      key={group.id}
+                      key={group._id}
                       className="p-4 border rounded-lg hover:border-blue-200 transition-colors"
                     >
                       <div className="flex justify-between items-start">
@@ -222,7 +234,7 @@ const StudyGroups = () => {
                       <div className="mt-4 flex justify-between items-center">
                         <div className="text-sm text-gray-600">
                           Next session:{' '}
-                          {group.nextSession.toLocaleString('en-US', {
+                          {new Date(group.nextSession).toLocaleString('en-US', {
                             month: 'short',
                             day: 'numeric',
                             hour: '2-digit',
@@ -231,7 +243,7 @@ const StudyGroups = () => {
                         </div>
                         <button
                           className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-                          onClick={() => handleJoinGroup(group.id)}
+                          onClick={() => handleJoinGroup(group._id)}
                         >
                           Join Group
                         </button>
@@ -244,6 +256,8 @@ const StudyGroups = () => {
         </div>
 
         <div className="space-y-4">
+          {/* TODO: HardCoded need to be removed after implementing the logic for upcoming sessions */}
+          {/* Upcoming Sessions */}
           <Card>
             <CardHeader>
               <CardTitle>Upcoming Sessions</CardTitle>

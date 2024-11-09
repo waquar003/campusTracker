@@ -1,6 +1,6 @@
 import express from 'express';
 import { studyGroupController } from '../controllers/StudyGroup.controller.js';
-import { verifyJWT } from '../middleware/auth.middleware.js';
+import { verifyJWT } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 

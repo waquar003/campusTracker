@@ -221,20 +221,19 @@ const Assignments = () => {
 
   const handleEdit = (data: Partial<Assignment>) => {
     if (!editingAssignment?.id) return;
-  
+
     const updatedData = {
       id: editingAssignment.id,
-      
-        ...data,
-        dueDate: new Date(data.dueDate as string),
-      
+
+      ...data,
+      dueDate: new Date(data.dueDate as string),
     };
-  
+
     dispatch(updateAssignment(updatedData));
     setEditingAssignment(undefined);
     setIsDialogOpen(false);
   };
-  
+
   const handleDelete = (id: string) => {
     if (window.confirm('Are you sure you want to delete this assignment?')) {
       dispatch(deleteAssignment(id));

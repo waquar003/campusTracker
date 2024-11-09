@@ -16,7 +16,7 @@ export const fetchAssignments = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get(API_URL, { withCredentials: true });
-      
+
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
