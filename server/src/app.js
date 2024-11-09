@@ -51,10 +51,12 @@ import userRouter from './routes/User.routes.js';
 import scheduleRoutes from './routes/Schedule.routes.js';
 import academicGoalRoutes from './routes/AcademicGoal.routes.js';
 import assignmentRoutes from './routes/Assignment.routes.js';
+import studyGroupRoutes from './routes/StudyGroup.routes.js';
 
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/schedule', scheduleRoutes);
 app.use('/api/v1/academic-goals', academicGoalRoutes);
 app.use('/api/v1/assignments', assignmentRoutes);
+app.use('/api/v1/groups', studyGroupRoutes);
 
 export default app;
