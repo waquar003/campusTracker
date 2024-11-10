@@ -47,20 +47,20 @@ const StudyGroups = () => {
     description: '',
     tags: '',
   });
-  const [activeGroups, setActiveGroups] = useState<StudyGroup[]>([
-    {
-      id: '1',
-      name: 'Database Masters',
-      subject: 'Database Systems',
-      members: 5,
-      maxMembers: 8,
-      level: 3,
-      nextSession: new Date(2024, 9, 27, 14, 0),
-      description: 'Advanced SQL and NoSQL concepts study group',
-      tags: ['SQL', 'MongoDB', 'Database Design'],
-    },
-  ]);
-  const [joinedGroupIds, setJoinedGroupIds] = useState<string[]>([]);
+  // const [activeGroups, setActiveGroups] = useState<StudyGroup[]>([
+  //   {
+  //     id: '1',
+  //     name: 'Database Masters',
+  //     subject: 'Database Systems',
+  //     members: 5,
+  //     maxMembers: 8,
+  //     level: 3,
+  //     nextSession: new Date(2024, 9, 27, 14, 0),
+  //     description: 'Advanced SQL and NoSQL concepts study group',
+  //     tags: ['SQL', 'MongoDB', 'Database Design'],
+  //   },
+  // ]);
+  // const [joinedGroupIds, setJoinedGroupIds] = useState<string[]>([]);
 
   const [upcomingSessions] = useState<StudySession[]>([
     {
@@ -310,7 +310,7 @@ const StudyGroups = () => {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Active Groups</span>
-                  <span className="font-medium">{joinedGroupIds.length}</span>
+                  <span className="font-medium">{user.studyGroups.length}</span>
                 </div>
               </div>
             </CardContent>
