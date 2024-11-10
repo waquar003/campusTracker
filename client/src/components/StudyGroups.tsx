@@ -104,7 +104,7 @@ const StudyGroups = () => {
 
   const handleJoinGroup = (groupId: string) => {
     dispatch(joinGroup(groupId));
-    user.studyGroups.push(user._id);
+    user.studyGroups.push(groupId);
   };
 
   return (
@@ -214,7 +214,7 @@ const StudyGroups = () => {
                             Level {group.level}
                           </span>
                           <span className="bg-green-100 text-green-600 px-2 py-1 rounded text-sm">
-                            {group.members}/{group.maxMembers}
+                            {group.members.length}/{group.maxMembers}
                           </span>
                         </div>
                       </div>

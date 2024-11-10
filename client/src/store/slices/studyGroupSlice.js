@@ -32,7 +32,7 @@ export const fetchGroup = createAsyncThunk('studyGroups/fetch', async () => {
 export const joinGroup = createAsyncThunk(
   'studyGroups/join',
   async (groupId) => {
-    const response = await axios.patch(
+    const response = await axios.post(
       `${API_URL}/${groupId}/join`,
       {},
       {
