@@ -148,109 +148,6 @@ const updateProfilePicture = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, 'Profile picture updated successfully'));
 });
 
-const createAssignment = asyncHandler(async (req, res) => {
-  const { title, course, dueDate, description, priority, auraPoints } =
-    req.body;
-  const user = await User.findById(req.user._id);
-
-  if (!user) {
-    throw new ApiError(404, 'User not found');
-  }
-
-  const newAssignment = {
-    id: Date.now().toString(),
-    title,
-    course,
-    dueDate: new Date(dueDate),
-    status: 'pending',
-    description,
-    priority,
-    auraPoints,
-  };
-
-  user.assignments.push(newAssignment);
-  await user.save();
-
-  return res
-    .status(201)
-    .json(
-      new ApiResponse(201, newAssignment, 'Assignment created successfully')
-    );
-});
-
-const updateAssignment = asyncHandler(async (req, res) => {
-  const { assignmentId } = req.params;
-  const updateData = req.body;
-  const user = await User.findById(req.user._id);
-
-  if (!user) {
-    throw new ApiError(404, 'User not found');
-  }
-
-  const assignmentIndex = user.assignments.findIndex(
-    (assignment) => assignment.id === assignmentId
-  );
-
-  if (assignmentIndex === -1) {
-    throw new ApiError(404, 'Assignment not found');
-  }
-
-  user.assignments[assignmentIndex] = {
-    ...user.assignments[assignmentIndex],
-    ...updateData,
-    dueDate: new Date(updateData.dueDate),
-  };
-
-  await user.save();
-
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        user.assignments[assignmentIndex],
-        'Assignment updated successfully'
-      )
-    );
-});
-
-const deleteAssignment = asyncHandler(async (req, res) => {
-  const { assignmentId } = req.params;
-  const user = await User.findById(req.user._id);
-
-  if (!user) {
-    throw new ApiError(404, 'User not found');
-  }
-
-  user.assignments = user.assignments.filter(
-    (assignment) => assignment.id !== assignmentId
-  );
-
-  await user.save();
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, null, 'Assignment deleted successfully'));
-});
-
-const getAllAssignments = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id);
-
-  if (!user) {
-    throw new ApiError(404, 'User not found');
-  }
-
-  const assignments = user.assignments.sort(
-    (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
-  );
-
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(200, assignments, 'Assignments retrieved successfully')
-    );
-});
-
 export {
   registerUser,
   loginUser,
@@ -258,8 +155,4 @@ export {
   profile,
   updateProfile,
   updateProfilePicture,
-  createAssignment,
-  updateAssignment,
-  deleteAssignment,
-  getAllAssignments,
 };

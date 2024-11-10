@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:4000/api/v1/schedule';
+const API_URL = 'http://localhost:4000/api/v1/assignments';
 
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
@@ -16,6 +16,7 @@ export const fetchAssignments = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get(API_URL, { withCredentials: true });
+
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
@@ -43,9 +44,9 @@ export const createAssignment = createAsyncThunk(
 
 export const updateAssignment = createAsyncThunk(
   'assignment/updateAssignment',
-  async ({ id, data }, { rejectWithValue }) => {
+  async (data, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL}/${id}`, data, {
+      const response = await axios.patch(`${API_URL}/${data.id}`, data, {
         withCredentials: true,
         headers: {
           'Content-Type': 'application/json',
@@ -96,6 +97,7 @@ const assignmentSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchAssignments.fulfilled, (state, action) => {
+        // console.log(action.payload)
         state.loading = false;
         state.assignments = action.payload;
         state.error = null;

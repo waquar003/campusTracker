@@ -1,16 +1,27 @@
 import mongoose from 'mongoose';
 
 const assignmentSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  description: String,
-  course: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Course',
+    ref: 'User',
     required: true,
   },
-  deadline: { type: Date, required: true },
-  auraPoints: { type: Number, default: 0 },
-  completed: { type: Boolean, default: false },
+  assignments: [
+    {
+      id: { type: String, required: true },
+      title: { type: String, required: true },
+      course: { type: String, required: true },
+      dueDate: { type: Date, required: true },
+      status: {
+        type: String,
+        default: 'pending',
+        enum: ['pending', 'completed', 'overdue'],
+      },
+      description: String,
+      priority: String,
+      auraPoints: { type: Number, default: 0 },
+    },
+  ],
 });
 
 export const Assignment = mongoose.model('Assignment', assignmentSchema);
