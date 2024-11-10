@@ -105,6 +105,8 @@ const scheduleSlice = createSlice({
       })
       .addCase(fetchSchedules.fulfilled, (state, action) => {
         state.loading = false;
+        console.log('Schedules', action.payload);
+
         state.schedules = action.payload;
         state.error = null;
         state.lastFetchedDate = new Date().toISOString();

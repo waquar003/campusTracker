@@ -3,6 +3,10 @@ import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { format } from 'date-fns';
 import { fetchSchedules } from '../store/slices/scheduleSlice.js';
+import {
+  fetchAcademicGoals,
+  markGoalComplete,
+} from '../store/slices/academicGoalSlice.js';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -61,30 +65,31 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const navigateToProfile = () => {
-    navigate('settings'); // This navigates to the Profile page
+    navigate('settings');
   };
 
   const dispatch = useDispatch();
   const { user: userData } = useSelector((state) => state.auth);
   const { schedules } = useSelector((state) => state.schedule);
   const [date, setDate] = useState(new Date());
+  const { goals } = useSelector((state) => state.academicGoals);
 
-  const [goals, setGoals] = useState<AcademicGoal[]>([
-    {
-      id: '1',
-      title: 'Complete Database Project',
-      dueDate: '2024-02-20',
-      completed: false,
-      auraPoints: 100,
-    },
-    {
-      id: '2',
-      title: 'Study for Algorithm Quiz',
-      dueDate: '2024-02-25',
-      completed: false,
-      auraPoints: 50,
-    },
-  ]);
+  // const [goals, setGoals] = useState<AcademicGoal[]>([
+  //   {
+  //     id: '1',
+  //     title: 'Complete Database Project',
+  //     dueDate: '2024-02-20',
+  //     completed: false,
+  //     auraPoints: 100,
+  //   },
+  //   {
+  //     id: '2',
+  //     title: 'Study for Algorithm Quiz',
+  //     dueDate: '2024-02-25',
+  //     completed: false,
+  //     auraPoints: 50,
+  //   },
+  // ]);
 
   // const [userData, setUserData] = useState({
   //   name: '',
@@ -98,8 +103,14 @@ const Dashboard = () => {
 
   useEffect(() => {
     const todayFormatted = format(date, 'yyyy-MM-dd');
-    dispatch(fetchSchedules(todayFormatted)); // Fetch schedules for the selected date (today)
+    dispatch(fetchSchedules(todayFormatted));
   }, [date, dispatch]);
+
+  useEffect(() => {
+    dispatch(fetchAcademicGoals());
+  }, [dispatch]);
+
+  const unachievedGoals = goals.filter((item) => item.completed === false);
 
   if (!userData) {
     return <div>Loading...</div>;
@@ -202,7 +213,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {goals.map((goal) => (
+              {unachievedGoals.map((goal) => (
                 <div
                   key={goal.id}
                   className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
@@ -210,14 +221,15 @@ const Dashboard = () => {
                   <div>
                     <h3 className="font-medium">{goal.title}</h3>
                     <p className="text-sm text-gray-600">
-                      Due {new Date(goal.dueDate).toLocaleDateString()}
+                      Due {new Date(goal.deadline).toLocaleDateString()}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-blue-600">
-                      +{goal.auraPoints} XP
-                    </span>
-                    <Button variant="outline" size="sm">
+                    <Button
+                      onClick={() => markGoalComplete(goal.id)}
+                      variant="outline"
+                      size="sm"
+                    >
                       Complete
                     </Button>
                   </div>

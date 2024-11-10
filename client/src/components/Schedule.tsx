@@ -426,8 +426,8 @@ const Schedule = () => {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+      <div className=" flex gap-6 flex-wrap xl:flex-nowrap">
+        <Card className="w-full flex items-center flex-col">
           <CardHeader>
             <CardTitle>Calendar</CardTitle>
           </CardHeader>
@@ -441,13 +441,12 @@ const Schedule = () => {
           </CardContent>
         </Card>
 
-        <Card className="md:col-span-2">
+        <Card className="w-full">
           <CardHeader>
             <CardTitle>Daily Schedule</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              .
               {events && events.length > 0 ? (
                 events.map((event) => (
                   <div

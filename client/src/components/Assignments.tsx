@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   fetchAssignments,
@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { useDispatch } from 'react-redux';
 
 interface Assignment {
   id: string;
@@ -200,26 +201,77 @@ const Assignments = () => {
     Assignment | undefined
   >();
 
-  const handleCreate = (data: Partial<Assignment>) => {
-    const newAssignment = {
-      ...data,
-      id: Date.now().toString(),
-    } as Assignment;
-    setAssignments([...assignments, newAssignment]);
+  const dispatch = useDispatch();
+  const isAuthenticated = localStorage.getItem('isAuthenticated');
+
+  useEffect(() => {
+    console.log('Assignment.tsx: ', isAuthenticated);
+    if (isAuthenticated) {
+      console.log('Fetching Assignment');
+      dispatch(fetchAssignments());
+    }
+  }, [dispatch, isAuthenticated]);
+
+  // const handleCreate = (data: Partial<Assignment>) => {
+  // const newAssignment = {
+  //   ...data,
+  //   id: Date.now().toString(),
+  // } as Assignment;
+  // setAssignments([...assignments, newAssignment]);
+  // };
+
+  const handleCreate = async (data) => {
+    await dispatch(createAssignment(data));
+    setIsDialogOpen(false);
   };
 
-  const handleEdit = (data: Partial<Assignment>) => {
-    setAssignments(
-      assignments.map((a) =>
-        a.id === editingAssignment?.id ? { ...a, ...data } : a
-      )
-    );
+  // const handleEdit = (data: Partial<Assignment>) => {
+  //   setAssignments(
+  //     assignments.map((a) =>
+  //       a.id === editingAssignment?.id ? { ...a, ...data } : a
+  //     )
+  //   );
+  //   setEditingAssignment(undefined);
+  // };
+  const handleEdit = async (data) => {
+    console.log('Edit triggered with data:', data);
+    console.log(editingAssignment);
+    if (editingAssignment?._id) {
+      const updateData = {
+        id: editingAssignment._id,
+        data: {
+          title: data.title,
+          course: data.course,
+          dueDate: data.dueDate,
+          status: data.status,
+          description: data.description,
+          priority: data.priority,
+          auraPointa: data.auraPoints,
+        },
+      };
+      console.log('Dispatching update with:', updateData);
+      await dispatch(updateAssignment(updateData));
+      dispatch(fetchAssignments());
+    }
+    setIsDialogOpen(false);
     setEditingAssignment(undefined);
   };
 
-  const handleDelete = (id: string) => {
+  const handleEditClick = (assignment) => {
+    console.log('Editing assignment:', assignment); // Debug log
+    setAssignments({
+      ...assignment,
+      dueDate: new Date(assignment.start),
+      status: assignment.status,
+      priority: assignment.priority,
+      auraPoints: assignment.auraPoints,
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this assignment?')) {
-      setAssignments(assignments.filter((a) => a.id !== id));
+      await dispatch(deleteAssignment(id));
     }
   };
 

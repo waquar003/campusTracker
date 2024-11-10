@@ -132,7 +132,7 @@ const AcademicGoals = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const dispatch = useDispatch();
 
-  const goals = useSelector((state: any) => state.academicGoals.goals) || [];
+  const { goals } = useSelector((state: any) => state.academicGoals) || [];
 
   console.log(goals);
 

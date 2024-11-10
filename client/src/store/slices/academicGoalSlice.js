@@ -19,8 +19,9 @@ export const fetchAcademicGoals = createAsyncThunk(
     if (!token) throw new Error('Token not found');
 
     const response = await axios.get(`${API_URL}`);
-
-    return response.data.data;
+    console.log('Fetch Goals');
+    console.log(response.data.data.goals);
+    return response.data.data.goals;
   }
 );
 
@@ -72,8 +73,11 @@ const academicGoalSlice = createSlice({
         state.status = 'loading';
       })
       .addCase(fetchAcademicGoals.fulfilled, (state, action) => {
+        console.log('Fetched goals:', action.payload);
         state.status = 'succeeded';
-        state.goals = action.payload.goals || [];
+        state.goals = action.payload || [];
+
+        console.log('state.goals', state.goals);
       })
       .addCase(fetchAcademicGoals.rejected, (state, action) => {
         state.status = 'failed';
